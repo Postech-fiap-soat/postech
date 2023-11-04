@@ -32,7 +32,7 @@ resource "aws_db_instance" "soat-db-instance-2" {
     vpc_security_group_ids = [aws_security_group.sg-db.id]
 }
 
-resource "aws_db_subnet_group" "db-subnet" {
-    name = "dbsubnet"
-    subnet_ids = aws_subnet.new-subnets[*].id
-}
+# resource "aws_db_subnet_group" "db-subnet" {
+#     name = "dbsubnet"
+#     subnet_ids = aws_subnet.new-subnets[*].id
+# }
