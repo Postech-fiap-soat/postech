@@ -107,7 +107,7 @@ jobs:
 
         echo "** Running Terraform Apply**"
         terraform apply -auto-approve
-      working-directory: ${{ github.event.inputs.tfpath }}"
+      working-directory: './k8s-infra'
 
   #   - name: Install and configure kubectl
   #     run: |
