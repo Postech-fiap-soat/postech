@@ -108,10 +108,8 @@ jobs:
         echo "** Running Terraform Apply**"
         terraform apply -auto-approve
         cat kubeconfig
-        echo "** LISTA 1**"
-        ls ~/runners/
-         # cp kubeconfig ~/.kube/config
-        # echo ~/.kube/config
+        echo "** Setando contexto **"
+        kubectl config set-context --current --kubeconfig="kubeconfig"
       working-directory: './k8s-infra'
 
     # - name: Install and configure kubectl
