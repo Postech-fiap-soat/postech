@@ -91,10 +91,6 @@ jobs:
         aws-region: us-east-1
     - name: Setup Terraform CLI
       uses: hashicorp/setup-terraform@v2.0.2
-    - uses: prepor/action-aws-iam-authenticator@master
-    - uses: actions-hub/kubectl@master
-      env:
-        KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
     - name: Terraform init, plan and apply
       run: |
         echo `pwd`
@@ -109,24 +105,11 @@ jobs:
         terraform plan
 
         echo "** Running Terraform Apply**"
-        terraform apply -auto-approve
-        cat kubeconfig
-        echo "** VARSAO KUBECTL**"
-       
-        ls ${HOME}/
-        # ls ${HOME}/.kube
-         # cp kubeconfig ~/.kube/config
-        # echo ~/.kube/config
+        terraform apply -auto-approve     
       working-directory: './k8s-infra'
-
-    # - name: Install and configure kubectl
-    #   run: |
-  #       VERSION=$(curl --silent https://storage.googleapis.com/kubernetes-release/release/stable.txt)
-  #       curl https://storage.googleapis.com/kubernetes-release/release/$VERSION/bin/linux/amd64/kubectl \
-  #           --progress-bar \
-  #           --location \
-  #           --remote-name
-  #       chmod +x kubectl
-  #       sudo mv kubectl /usr/local/bin/
-  #       echo ${{ secrets.KUBECONFIG }} | base64 --decode > kubeconfig.yaml
+    - name: KUBECTL  
+      uses: azure/setup-kubectl@v3
+    - run: aws sts get-caller-identity
+    - run: aws eks update-kubeconfig --region us-east-1 --name no2-soat-ntsoatcluster
+    - run: kubectl get svc
   
