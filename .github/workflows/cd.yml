@@ -66,10 +66,10 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
   
-  tf_code_check:
+  deploy:
     name: Terraform Validation and Build
     runs-on: ubuntu-latest
-    needs: test
+    needs: push_to_registry
     steps:
     - uses: actions/checkout@v4
     - name: Configure AWS Credentials Action For GitHub Actions
