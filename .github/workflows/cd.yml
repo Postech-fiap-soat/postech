@@ -94,20 +94,20 @@ jobs:
     - uses: azure/setup-kubectl@v3
     - name: Terraform init, plan and apply
       run: |
-        kubectl version
-        # echo `pwd`
-        # echo "tfpath ${{ github.event.inputs.tfpath }}"
-        # echo "** Running Terraform Init**"
-        # terraform init
+        echo `pwd`
+        echo "tfpath ${{ github.event.inputs.tfpath }}"
+        echo "** Running Terraform Init**"
+        terraform init
 
-        # echo "** Running Terraform Validate**"
-        # terraform validate
+        echo "** Running Terraform Validate**"
+        terraform validate
 
-        # echo "** Running Terraform Plan**"
-        # terraform plan
+        echo "** Running Terraform Plan**"
+        terraform plan
 
-        # echo "** Running Terraform Apply**"
-        # terraform apply -auto-approve
+        echo "** Running Terraform Apply**"
+        terraform apply -auto-approve
+        cp kubeconfig ~/.kube/config
       working-directory: './k8s-infra'
 
     # - name: Install and configure kubectl
