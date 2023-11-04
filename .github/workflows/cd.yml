@@ -91,25 +91,23 @@ jobs:
         aws-region: us-east-1
     - name: Setup Terraform CLI
       uses: hashicorp/setup-terraform@v2.0.2
-    - name: Terraform init, plan and apply
-      run: |
-        echo "** Running Terraform Init**"
-        terraform init
+    # - name: Terraform init, plan and apply
+      # run: |
+      #   echo "** Running Terraform Init**"
+      #   terraform init
 
-        echo "** Running Terraform Validate**"
-        terraform validate
+      #   echo "** Running Terraform Validate**"
+      #   terraform validate
 
-        echo "** Running Terraform Plan**"
-        terraform plan
+      #   echo "** Running Terraform Plan**"
+      #   terraform plan
 
-        echo "** Running Terraform Apply**"
-        terraform apply -auto-approve     
-    # - run: echo `pwd`
-    # - run: echo "tfpath ${{ github.event.inputs.tfpath }}"
-    # - run: terraform init
-    # - run: terraform validate
-    # - run: terraform plan
-    # - run: terraform apply -auto-approve     
+      #   echo "** Running Terraform Apply**"
+      #   terraform apply -auto-approve     
+    - run: terraform -chdir='./k8s-infra' init
+    - run: terraform -chdir='./k8s-infra' validate
+    - run: terraform -chdir='./k8s-infra' plan
+    - run: terraform -chdir='./k8s-infra' apply -auto-approve     
       working-directory: './k8s-infra'
     - name: KUBECTL  
       uses: azure/setup-kubectl@v3
