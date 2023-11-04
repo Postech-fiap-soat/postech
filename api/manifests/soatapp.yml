@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: soatapp-deployment
+spec:
+  template:
+    metadata:
+      name: soatapp
+      labels:
+        app: soatapp
+    spec:
+      containers:
+      - name: soatapp
+        image: mateuspanda:soatapp:latest
+        ports: 
+          - containerPort: 3000
+        livenessProbe:
+          httpGet:
+            path: /api/v1/products
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /api/v1/products
+            port: 3000
+          initialDelaySeconds: 30
+          failureThreshold: 3
+          periodSeconds: 30
+        envFrom: 
+          - configMapRef:
+              name: soatapp-configmap
+        env:
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: secrets
+                key: AWS_ACCESS_KEY_ID
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: secrets
+                key: AWS_SECRET_ACCESS_KEY          
+  replicas: 3
+  selector:
+    matchLabels:
+      app: soatapp

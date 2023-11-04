@@ -1,4 +1,4 @@
 /api/dist/*
 /api/node_modules/*
 /api./vscode/*
-/api.env
+/api/.env

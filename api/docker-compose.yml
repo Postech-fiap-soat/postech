@@ -1,0 +1,37 @@
+version: '3'
+services:
+  soatapp:
+    build: .
+    container_name: soatapp
+    restart: always
+    depends_on:
+      - soatdb
+    environment:
+      - DB_HOST=soatdb
+      - DB_PORT=3306
+      - DB_USER=soatuser
+      - DB_PASSWORD=soatpassword
+      - DB_NAME=soatdb
+    ports:
+      - 3000:3000
+  soatdb:
+    image: mysql:8.0.33
+    container_name: soatdb
+    command: mysqld --default-authentication-plugin=mysql_native_password
+    restart: always
+    tty: true
+    environment:
+      - MYSQL_DATABASE=soatdb
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=soatuser
+      - MYSQL_PASSWORD=soatpassword
+    ports:
+      - 3306:3306
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+networks:
+  default:
+    driver: bridge
