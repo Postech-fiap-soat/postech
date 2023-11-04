@@ -1,5 +1,5 @@
-/api/dist/*
-/api/node_modules/*
+/api/dist
+/api/node_modules
 /api./vscode/*
 /api/.env
 k8s-infra/.terraform/*
