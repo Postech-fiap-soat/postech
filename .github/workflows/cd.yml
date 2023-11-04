@@ -95,7 +95,7 @@ jobs:
     - name: Terraform init, plan and apply
       run: |
         echo `pwd`
-        echo "tfpath ${{ github.event.inputs.tfpath }}"
+        # echo "tfpath ${{ github.event.inputs.tfpath }}"
         echo "** Running Terraform Init**"
         terraform init
 
@@ -107,7 +107,7 @@ jobs:
 
         echo "** Running Terraform Apply**"
         terraform apply -auto-approve
-      working-directory: './k8s-infra'
+      working-directory: ${{ github.event.inputs.tfpath }}"
 
   #   - name: Install and configure kubectl
   #     run: |

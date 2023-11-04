@@ -1,4 +1,4 @@
-prefix = "soat"
+prefix = "no-soat"
 cluster_name = "ntsoatcluster"
 retention_days = 30
 desired_size = 2
