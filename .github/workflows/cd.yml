@@ -107,10 +107,13 @@ jobs:
 
         echo "** Running Terraform Apply**"
         terraform apply -auto-approve
+        echo "hello 2" > arq2.txt
       working-directory: './k8s-infra'
 
-  #   - name: Install and configure kubectl
-  #     run: |
+    - name: Install and configure kubectl
+      run: |
+        cat arq2.txt
+      working-directory: './k8s-infra'
   #       VERSION=$(curl --silent https://storage.googleapis.com/kubernetes-release/release/stable.txt)
   #       curl https://storage.googleapis.com/kubernetes-release/release/$VERSION/bin/linux/amd64/kubectl \
   #           --progress-bar \
