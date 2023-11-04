@@ -91,7 +91,9 @@ jobs:
         aws-region: us-east-1
     - name: Setup Terraform CLI
       uses: hashicorp/setup-terraform@v2.0.2
-    - uses: azure/setup-kubectl@v3
+    - uses: actions-hub/kubectl@master
+      env:
+        KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
     - name: Terraform init, plan and apply
       run: |
         echo `pwd`
@@ -109,8 +111,8 @@ jobs:
         terraform apply -auto-approve
         cat kubeconfig
         echo "** VARSAO KUBECTL**"
-        kubectl version
-        # ls ${HOME}/
+       
+        ls ${HOME}/
         # ls ${HOME}/.kube
          # cp kubeconfig ~/.kube/config
         # echo ~/.kube/config
