@@ -109,7 +109,7 @@ jobs:
         terraform apply -auto-approve
         cat kubeconfig
         echo "** LISTA 1**"
-        ls ~/
+        ls ~/runners/
          # cp kubeconfig ~/.kube/config
         # echo ~/.kube/config
       working-directory: './k8s-infra'
