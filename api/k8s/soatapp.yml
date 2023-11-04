@@ -30,17 +30,17 @@ spec:
         envFrom: 
           - configMapRef:
               name: soatapp-configmap
-        # env:
-        #   - name: AWS_ACCESS_KEY_ID
-        #     valueFrom:
-        #       secretKeyRef:
-        #         name: secrets
-        #         key: AWS_ACCESS_KEY_ID
-        #   - name: AWS_SECRET_ACCESS_KEY
-        #     valueFrom:
-        #       secretKeyRef:
-        #         name: secrets
-        #         key: AWS_SECRET_ACCESS_KEY          
+        env:
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: secrets
+                key: DB_USER
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: secrets
+                key: DB_PASSWORD          
   replicas: 3
   selector:
     matchLabels:

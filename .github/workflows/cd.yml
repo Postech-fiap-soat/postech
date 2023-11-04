@@ -113,5 +113,6 @@ jobs:
     - run: aws eks update-kubeconfig --region us-east-1 --name no2-soat-ntsoatcluster
     - run: kubectl get svc
     - run: kubectl apply -f ./api/k8s/soatapp-configmap.yml
+    - run: kubectl apply -f ./api/k8s/secrets.yml
     - run: kubectl apply -f ./api/k8s/soatapp.yml
     - run: kubectl apply -f ./api/k8s/soatapp-svc.yml

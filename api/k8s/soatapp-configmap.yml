@@ -5,6 +5,4 @@ metadata:
 data:
   DB_HOST: 'terraform-20231104215550504400000002.cv6estrfzfc7.us-east-1.rds.amazonaws.com'
   DB_PORT: '3306'
-  DB_USER: soatuser
-  DB_PASSWORD: soatpassword
   DB_NAME: soatdb
