@@ -2,7 +2,7 @@
 /api/node_modules
 /api./vscode/*
 /api/.env
-k8s-infra/.terraform/*
+k8s-infra/.terraform
 k8s-infra/.terraform.lock.hcl
 k8s-infra/terraform.tfstate
 k8s-infra/terraform.tfstate.backup
