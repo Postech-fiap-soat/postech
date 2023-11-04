@@ -105,7 +105,7 @@ jobs:
       #   echo "** Running Terraform Apply**"
       #   terraform apply -auto-approve     
     - run: terraform -chdir='./k8s-infra' init
-    - run: terraform -chdir=./k8s-infra' apply --auto-approve     
+    - run: terraform -chdir='./k8s-infra' apply --auto-approve     
       working-directory: './k8s-infra'
     - name: KUBECTL  
       uses: azure/setup-kubectl@v3
