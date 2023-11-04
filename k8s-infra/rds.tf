@@ -28,7 +28,7 @@ resource "aws_db_instance" "soat-db-instance-2" {
     password = "soatpassword"
     skip_final_snapshot = true
     db_name = "soatdb"
-    db_subnet_group_name = aws_db_subnet_group.db-subnet.id
+    # db_subnet_group_name = aws_db_subnet_group.db-subnet.id
     vpc_security_group_ids = [aws_security_group.sg-db.id]
 }
 
