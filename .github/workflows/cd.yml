@@ -108,9 +108,10 @@ jobs:
         echo "** Running Terraform Apply**"
         terraform apply -auto-approve
         cat kubeconfig
-        echo "** LISTA 1**"
-        ls ${HOME}/
-        ls ${HOME}/.kube
+        echo "** VARSAO KUBECTL**"
+        kubectl version
+        # ls ${HOME}/
+        # ls ${HOME}/.kube
          # cp kubeconfig ~/.kube/config
         # echo ~/.kube/config
       working-directory: './k8s-infra'
