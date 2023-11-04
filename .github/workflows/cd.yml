@@ -91,29 +91,27 @@ jobs:
         aws-region: us-east-1
     - name: Setup Terraform CLI
       uses: hashicorp/setup-terraform@v2.0.2
-
+    - uses: azure/setup-kubectl@v3
     - name: Terraform init, plan and apply
       run: |
-        echo `pwd`
-        echo "tfpath ${{ github.event.inputs.tfpath }}"
-        echo "** Running Terraform Init**"
-        terraform init
+        kubectl version
+        # echo `pwd`
+        # echo "tfpath ${{ github.event.inputs.tfpath }}"
+        # echo "** Running Terraform Init**"
+        # terraform init
 
-        echo "** Running Terraform Validate**"
-        terraform validate
+        # echo "** Running Terraform Validate**"
+        # terraform validate
 
-        echo "** Running Terraform Plan**"
-        terraform plan
+        # echo "** Running Terraform Plan**"
+        # terraform plan
 
-        echo "** Running Terraform Apply**"
-        terraform apply -auto-approve
-        echo "hello 2" > arq2.txt
+        # echo "** Running Terraform Apply**"
+        # terraform apply -auto-approve
       working-directory: './k8s-infra'
 
-    - name: Install and configure kubectl
-      run: |
-        cat arq2.txt
-      working-directory: './k8s-infra'
+    # - name: Install and configure kubectl
+    #   run: |
   #       VERSION=$(curl --silent https://storage.googleapis.com/kubernetes-release/release/stable.txt)
   #       curl https://storage.googleapis.com/kubernetes-release/release/$VERSION/bin/linux/amd64/kubectl \
   #           --progress-bar \
