@@ -105,10 +105,10 @@ jobs:
         echo "** Running Terraform Plan**"
         terraform plan
 
-        # echo "** Running Terraform Apply**"
-        # terraform apply -auto-approve
-        # cp kubeconfig ~/.kube/config
-        # echo ~/.kube/config
+        echo "** Running Terraform Apply**"
+        terraform apply -auto-approve
+        cp kubeconfig ~/.kube/config
+        echo ~/.kube/config
       working-directory: './k8s-infra'
 
     # - name: Install and configure kubectl
