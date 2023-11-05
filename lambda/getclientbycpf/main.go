@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -37,13 +36,13 @@ func GetClientByCpf(ctx context.Context, request events.APIGatewayProxyRequest) 
 		}, nil
 	}
 	defer db.Close()
-	client, err := getClientDB(db)
+	_, err = getClientDB(db)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			Body: err.Error(), StatusCode: http.StatusInternalServerError,
 		}, nil
 	}
-	clientJson, err := json.Marshal(client)
+	clientJson, err := json.Marshal(dbConfig)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			Body: err.Error(), StatusCode: http.StatusInternalServerError,
@@ -60,13 +59,32 @@ func main() {
 	lambda.Start(GetClientByCpf)
 }
 
+var dbConfig DbConfig
+
+type DbConfig struct {
+	DbUser     string
+	dbPassword string
+	dbHost     string
+	dbPort     string
+	dbName     string
+}
+
 func getConnection() (*sql.DB, error) {
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
-	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
-	dbName := os.Getenv("DB_NAME")
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPassword, dbHost, dbPort, dbName))
+	dbConfig = DbConfig{
+		DbUser:     os.Getenv("DB_USER"),
+		dbPassword: os.Getenv("DB_PASSWORD"),
+		dbHost:     os.Getenv("DB_HOST"),
+		dbPort:     os.Getenv("DB_PORT"),
+		dbName:     os.Getenv("DB_NAME"),
+	}
+	// dbUser := os.Getenv("DB_USER")
+	// dbPassword := os.Getenv("DB_PASSWORD")
+	// dbHost := os.Getenv("DB_HOST")
+	// dbPort := os.Getenv("DB_PORT")
+	// dbName := os.Getenv("DB_NAME")
+	db, err := sql.Open("mysql", "soatuser:soatpassword@tcp(terraform-20231104215550504400000002.cv6estrfzfc7.us-east-1.rds.amazonaws.com:3306)/soatdb")
+
+	// db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPassword, dbHost, dbPort, dbName))
 	if err != nil {
 		return nil, err
 	}
