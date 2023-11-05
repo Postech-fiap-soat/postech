@@ -85,11 +85,11 @@ jobs:
   
   deploy_zip:
     env:
-      DB_HOST: terraform-20231104215550504400000002.cv6estrfzfc7.us-east-1.rds.amazonaws.com
-      DB_PORT: 3306
-      DB_USER: soatuser
-      DB_PASSWORD: soatpassword
-      DB_NAME: soatdb
+      DB_HOST: 'terraform-20231104215550504400000002.cv6estrfzfc7.us-east-1.rds.amazonaws.com'
+      DB_PORT: '3306'
+      DB_USER: 'soatuser'
+      DB_PASSWORD: 'soatpassword'
+      DB_NAME: 'soatdb'
     name: deploy lambda function
     runs-on: ubuntu-latest
     strategy:
@@ -104,8 +104,11 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Build binary
         run: |
-          export DB_USER2=$DB_USER
-          echo $DB_USER2
+          export DB_HOST=$DB_HOST
+          export DB_PORT=$DB_PORT
+          export DB_USER=$DB_USER
+          export DB_PASSWORD=$DB_PASSWORD
+          export DB_NAME=$DB_NAME
           cd lambda && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -a -o bin/getclientbycpf getclientbycpf/main.go && zip deployment.zip bin/getclientbycpf
       - name: default deploy
         uses: appleboy/lambda-action@v0.1.9
