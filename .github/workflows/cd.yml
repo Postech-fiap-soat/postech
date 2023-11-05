@@ -100,8 +100,8 @@ jobs:
       #   run: |
       #     cd example && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -a -o main main.go && zip deployment.zip main
       - name: Generate ZIP
-        run: |
-          zip lambda/deployment.zip *.mjs 
+        run: zip deployment.zip *.mjs 
+        working-directory: './lambda'
       - name: default deploy
         uses: appleboy/lambda-action@v0.1.9
         with:
