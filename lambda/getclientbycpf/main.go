@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -36,13 +36,13 @@ func GetClientByCpf(ctx context.Context, request events.APIGatewayProxyRequest) 
 		}, nil
 	}
 	defer db.Close()
-	_, err = getClientDB(db)
+	client, err := getClientDB(db)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			Body: err.Error(), StatusCode: http.StatusInternalServerError,
 		}, nil
 	}
-	clientJson, err := json.Marshal(dbConfig)
+	clientJson, err := json.Marshal(client)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			Body: err.Error(), StatusCode: http.StatusInternalServerError,
@@ -59,8 +59,6 @@ func main() {
 	lambda.Start(GetClientByCpf)
 }
 
-var dbConfig DbConfig
-
 type DbConfig struct {
 	DbUser     string
 	DbPassword string
@@ -70,21 +68,24 @@ type DbConfig struct {
 }
 
 func getConnection() (*sql.DB, error) {
-	dbConfig = DbConfig{
-		DbUser:     os.Getenv("DB_USER"),
-		DbPassword: os.Getenv("DB_PASSWORD"),
-		DbHost:     os.Getenv("DB_HOST"),
-		DbPort:     os.Getenv("DB_PORT"),
-		DbName:     os.Getenv("DB_NAME"),
-	}
-	// dbUser := os.Getenv("DB_USER")
-	// dbPassword := os.Getenv("DB_PASSWORD")
-	// dbHost := os.Getenv("DB_HOST")
-	// dbPort := os.Getenv("DB_PORT")
-	// dbName := os.Getenv("DB_NAME")
-	db, err := sql.Open("mysql", "soatuser:soatpassword@tcp(terraform-20231104215550504400000002.cv6estrfzfc7.us-east-1.rds.amazonaws.com:3306)/soatdb")
 
-	// db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPassword, dbHost, dbPort, dbName))
+	var dbConfig DbConfig
+	// dbConfig = DbConfig{
+	// 	DbUser:     os.Getenv("DB_USER"),
+	// 	DbPassword: os.Getenv("DB_PASSWORD"),
+	// 	DbHost:     os.Getenv("DB_HOST"),
+	// 	DbPort:     os.Getenv("DB_PORT"),
+	// 	DbName:     os.Getenv("DB_NAME"),
+	// }
+	dbConfig = DbConfig{
+		DbUser:     "soatuser",
+		DbPassword: "soatpassword",
+		DbHost:     "terraform-20231104215550504400000002.cv6estrfzfc7.us-east-1.rds.amazonaws.com",
+		DbPort:     "3306",
+		DbName:     "soatdb",
+	}
+	// db, err := sql.Open("mysql", "soatuser:soatpassword@tcp(terraform-20231104215550504400000002.cv6estrfzfc7.us-east-1.rds.amazonaws.com:3306)/soatdb")
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbConfig.DbUser, dbConfig.DbPassword, dbConfig.DbHost, dbConfig.DbPort, dbConfig.DbName))
 	if err != nil {
 		return nil, err
 	}
