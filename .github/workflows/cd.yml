@@ -84,6 +84,12 @@ jobs:
   #   - run: terraform -chdir='./k8s-infra' apply --auto-approve        
   
   deploy_zip:
+    env:
+      DB_HOST: terraform-20231104215550504400000002.cv6estrfzfc7.us-east-1.rds.amazonaws.com
+      DB_PORT: 3306
+      DB_USER: soatuser
+      DB_PASSWORD: soatpassword
+      DB_NAME: soatdb
     name: deploy lambda function
     runs-on: ubuntu-latest
     strategy:

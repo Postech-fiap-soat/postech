@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -21,17 +22,6 @@ type Client struct {
 }
 
 func GetClientByCpf(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	// err := json.Unmarshal([]byte(request.Body), &client)
-	// if err != nil {
-	// 	return events.APIGatewayProxyResponse{
-	// 		Body: err.Error(), StatusCode: http.StatusInternalServerError,
-	// 	}, nil
-	// }
-	// os.Getenv("DB_USER")
-	// os.Getenv("DB_PASSWORD")
-	// os.Getenv("DB_HOST")
-	// os.Getenv("DB_PORT")
-	// os.Getenv("DB_NAME")
 	db, err := getConnection()
 	if err != nil {
 		log.Println("Erro ao estabeler conexao:", err.Error())
@@ -47,7 +37,6 @@ func GetClientByCpf(ctx context.Context, request events.APIGatewayProxyRequest) 
 		}, nil
 	}
 	defer db.Close()
-	fmt.Println(db)
 	client, err := getClientDB(db)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
@@ -72,7 +61,12 @@ func main() {
 }
 
 func getConnection() (*sql.DB, error) {
-	db, err := sql.Open("mysql", "soatuser:soatpassword@tcp(terraform-20231104215550504400000002.cv6estrfzfc7.us-east-1.rds.amazonaws.com:3306)/soatdb")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	dbName := os.Getenv("DB_NAME")
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPassword, dbHost, dbPort, dbName))
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +79,6 @@ func getClientDB(db *sql.DB) (*Client, error) {
 		return nil, err
 	}
 	defer stmt.Close()
-	fmt.Println(stmt)
 	var client Client
 	err = stmt.QueryRow("04787035116").Scan(&client.ID, &client.Name, &client.Cpf, &client.Email)
 	if err != nil {
