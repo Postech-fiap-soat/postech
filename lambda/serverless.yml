@@ -1,0 +1,27 @@
+service: getClientByCpf
+frameworkVersion: '3'
+provider:
+  name: aws
+  runtime: go1.x
+  stage: dev
+  region: us-east-1
+  # iam:
+  #   role:
+  #     statements:
+  #       - Effect: Allow
+  #         Action:
+  #           -
+
+
+# package:
+#   patterns:
+#     - '!./**'
+#     - ./bin/**
+
+functions:
+  get:
+    handler: bin/getclientbycpf
+    events:
+      - httpApi:
+          path: /products
+          method: get
