@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,6 +10,7 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golang-jwt/jwt"
 )
 
 type Client struct {
@@ -30,7 +30,6 @@ func GetClientByCpf(ctx context.Context, request events.APIGatewayProxyRequest) 
 	}
 	err = db.Ping()
 	if err != nil {
-		log.Println("Erro ao pingar conexao:", err.Error())
 		return events.APIGatewayProxyResponse{
 			Body: err.Error(), StatusCode: http.StatusInternalServerError,
 		}, nil
@@ -42,14 +41,20 @@ func GetClientByCpf(ctx context.Context, request events.APIGatewayProxyRequest) 
 			Body: err.Error(), StatusCode: http.StatusInternalServerError,
 		}, nil
 	}
-	clientJson, err := json.Marshal(client)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":    client.ID,
+		"name":  client.Name,
+		"cpf":   client.Cpf,
+		"email": client.Email,
+	})
+	tokenString, err := token.SignedString(getJWTSecret())
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			Body: err.Error(), StatusCode: http.StatusInternalServerError,
 		}, nil
 	}
 	return events.APIGatewayProxyResponse{
-		Body:       string(clientJson),
+		Body:       tokenString,
 		Headers:    map[string]string{"Content-Type": "application/json"},
 		StatusCode: http.StatusOK,
 	}, nil
@@ -68,8 +73,6 @@ type DbConfig struct {
 }
 
 func getConnection() (*sql.DB, error) {
-
-	var dbConfig DbConfig
 	// dbConfig = DbConfig{
 	// 	DbUser:     os.Getenv("DB_USER"),
 	// 	DbPassword: os.Getenv("DB_PASSWORD"),
@@ -77,7 +80,7 @@ func getConnection() (*sql.DB, error) {
 	// 	DbPort:     os.Getenv("DB_PORT"),
 	// 	DbName:     os.Getenv("DB_NAME"),
 	// }
-	dbConfig = DbConfig{
+	dbConfig := DbConfig{
 		DbUser:     "soatuser",
 		DbPassword: "soatpassword",
 		DbHost:     "terraform-20231104215550504400000002.cv6estrfzfc7.us-east-1.rds.amazonaws.com",
@@ -104,4 +107,8 @@ func getClientDB(db *sql.DB) (*Client, error) {
 		return nil, err
 	}
 	return &client, nil
+}
+
+func getJWTSecret() []byte {
+	return []byte("c29hdGxhbWJkYXNlY3JldA==")
 }
