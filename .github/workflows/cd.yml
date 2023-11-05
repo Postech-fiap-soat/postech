@@ -98,7 +98,7 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Build binary
         run: |
-          cd lambda && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -a -o bin/getclientbycpf getclientbycpf/main.go && zip deployment.zip main
+          cd lambda && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -a -o bin/getclientbycpf getclientbycpf/main.go && zip deployment.zip bin/getclientbycpf
       - name: default deploy
         uses: appleboy/lambda-action@v0.1.9
         with:
