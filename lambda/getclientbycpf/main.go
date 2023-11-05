@@ -63,19 +63,19 @@ var dbConfig DbConfig
 
 type DbConfig struct {
 	DbUser     string
-	dbPassword string
-	dbHost     string
-	dbPort     string
-	dbName     string
+	DbPassword string
+	DbHost     string
+	DbPort     string
+	DbName     string
 }
 
 func getConnection() (*sql.DB, error) {
 	dbConfig = DbConfig{
 		DbUser:     os.Getenv("DB_USER"),
-		dbPassword: os.Getenv("DB_PASSWORD"),
-		dbHost:     os.Getenv("DB_HOST"),
-		dbPort:     os.Getenv("DB_PORT"),
-		dbName:     os.Getenv("DB_NAME"),
+		DbPassword: os.Getenv("DB_PASSWORD"),
+		DbHost:     os.Getenv("DB_HOST"),
+		DbPort:     os.Getenv("DB_PORT"),
+		DbName:     os.Getenv("DB_NAME"),
 	}
 	// dbUser := os.Getenv("DB_USER")
 	// dbPassword := os.Getenv("DB_PASSWORD")
