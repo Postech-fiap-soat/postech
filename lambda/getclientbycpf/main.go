@@ -48,7 +48,7 @@ func GetClientByCpf(ctx context.Context, request events.APIGatewayProxyRequest) 
 	storedClient, err := getClientDB(db, client)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
-			Body: `{"message": "user not found"}`, StatusCode: http.StatusNotFound,
+			Body: `{"errorMessage": "user not found"}`, StatusCode: http.StatusNotFound,
 		}, nil
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
