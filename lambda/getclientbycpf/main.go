@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -56,13 +57,14 @@ func GetClientByCpf(ctx context.Context, request events.APIGatewayProxyRequest) 
 	// 	}, nil
 	// }
 	// jwtWrapperJson, err := json.Marshal(JwtWrapper{Token: tokenString})
+	jwtWrapperJson, _ := json.Marshal(JwtWrapper{Token: request.Body})
 	// if err != nil {
 	// 	return events.APIGatewayProxyResponse{
 	// 		Body: err.Error(), StatusCode: http.StatusInternalServerError,
 	// 	}, nil
 	// }
 	return events.APIGatewayProxyResponse{
-		Body:       string(request.Body),
+		Body:       string(jwtWrapperJson),
 		Headers:    map[string]string{"Content-Type": "application/json"},
 		StatusCode: http.StatusOK,
 	}, nil
