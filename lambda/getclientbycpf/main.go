@@ -3,15 +3,12 @@ package main
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/golang-jwt/jwt"
 )
 
 type Client struct {
@@ -26,46 +23,46 @@ type JwtWrapper struct {
 }
 
 func GetClientByCpf(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	db, err := getConnection()
-	if err != nil {
-		log.Println("Erro ao estabeler conexao:", err.Error())
-		return events.APIGatewayProxyResponse{
-			Body: err.Error(), StatusCode: http.StatusInternalServerError,
-		}, nil
-	}
-	err = db.Ping()
-	if err != nil {
-		return events.APIGatewayProxyResponse{
-			Body: err.Error(), StatusCode: http.StatusInternalServerError,
-		}, nil
-	}
-	defer db.Close()
-	client, err := getClientDB(db)
-	if err != nil {
-		return events.APIGatewayProxyResponse{
-			Body: err.Error(), StatusCode: http.StatusInternalServerError,
-		}, nil
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":    client.ID,
-		"name":  client.Name,
-		"cpf":   client.Cpf,
-		"email": client.Email,
-	})
-	tokenString, err := token.SignedString(getJWTSecret())
-	if err != nil {
-		return events.APIGatewayProxyResponse{
-			Body: err.Error(), StatusCode: http.StatusInternalServerError,
-		}, nil
-	}
-	jwtWrapperJson, err := json.Marshal(JwtWrapper{Token: tokenString})
-	if err != nil {
-		return events.APIGatewayProxyResponse{
-			Body: err.Error(), StatusCode: http.StatusInternalServerError,
-		}, nil
-	}
+
+	// db, err := getConnection()
+	// if err != nil {
+	// 	return events.APIGatewayProxyResponse{
+	// 		Body: err.Error(), StatusCode: http.StatusInternalServerError,
+	// 	}, nil
+	// }
+	// err = db.Ping()
+	// if err != nil {
+	// 	return events.APIGatewayProxyResponse{
+	// 		Body: err.Error(), StatusCode: http.StatusInternalServerError,
+	// 	}, nil
+	// }
+	// defer db.Close()
+	// client, err := getClientDB(db)
+	// if err != nil {
+	// 	return events.APIGatewayProxyResponse{
+	// 		Body: err.Error(), StatusCode: http.StatusInternalServerError,
+	// 	}, nil
+	// }
+	// token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+	// 	"id":    client.ID,
+	// 	"name":  client.Name,
+	// 	"cpf":   client.Cpf,
+	// 	"email": client.Email,
+	// })
+	// tokenString, err := token.SignedString(getJWTSecret())
+	// if err != nil {
+	// 	return events.APIGatewayProxyResponse{
+	// 		Body: err.Error(), StatusCode: http.StatusInternalServerError,
+	// 	}, nil
+	// }
+	// jwtWrapperJson, err := json.Marshal(JwtWrapper{Token: tokenString})
+	// if err != nil {
+	// 	return events.APIGatewayProxyResponse{
+	// 		Body: err.Error(), StatusCode: http.StatusInternalServerError,
+	// 	}, nil
+	// }
 	return events.APIGatewayProxyResponse{
-		Body:       string(jwtWrapperJson),
+		Body:       string(request.Body),
 		Headers:    map[string]string{"Content-Type": "application/json"},
 		StatusCode: http.StatusOK,
 	}, nil
