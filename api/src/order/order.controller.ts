@@ -1,6 +1,6 @@
 import { CheckoutOrderuseCase } from './usecases/checkoutorder.usecase';
 import { ConflictException, NotFoundException, Patch, Put } from '@nestjs/common';
-import { Body, Controller, Get, Post, Query, Param } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Param, Headers } from '@nestjs/common';
 import { CreateOrderDTO } from './dto/createorder.dto';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UpdateStatusOrderDTO } from './dto/updatestatusorder.dto';
@@ -75,9 +75,9 @@ export class OrderController {
     type: CreateOrderDTO
   })
   @ApiOperation({ summary: 'create order' })
-  async post(@Body() orderDto: CreateOrderDTO): Promise<ResponseDTO> {
+  async post(@Headers('authorization') authorization: string, @Body() orderDto: CreateOrderDTO): Promise<ResponseDTO> {
     try {
-      let order = await this.createOrderuseCase.handle(orderDto);
+      let order = await this.createOrderuseCase.handle(orderDto, authorization);
       return this.reponseHttpHelper.handleReponse(HttpStatusCode.Created, '', order)
 
     } catch (error) {
