@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golang-jwt/jwt"
 )
 
 type Client struct {
@@ -24,45 +25,50 @@ type JwtWrapper struct {
 }
 
 func GetClientByCpf(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-
-	// db, err := getConnection()
-	// if err != nil {
-	// 	return events.APIGatewayProxyResponse{
-	// 		Body: err.Error(), StatusCode: http.StatusInternalServerError,
-	// 	}, nil
-	// }
-	// err = db.Ping()
-	// if err != nil {
-	// 	return events.APIGatewayProxyResponse{
-	// 		Body: err.Error(), StatusCode: http.StatusInternalServerError,
-	// 	}, nil
-	// }
-	// defer db.Close()
-	// client, err := getClientDB(db)
-	// if err != nil {
-	// 	return events.APIGatewayProxyResponse{
-	// 		Body: err.Error(), StatusCode: http.StatusInternalServerError,
-	// 	}, nil
-	// }
-	// token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-	// 	"id":    client.ID,
-	// 	"name":  client.Name,
-	// 	"cpf":   client.Cpf,
-	// 	"email": client.Email,
-	// })
-	// tokenString, err := token.SignedString(getJWTSecret())
-	// if err != nil {
-	// 	return events.APIGatewayProxyResponse{
-	// 		Body: err.Error(), StatusCode: http.StatusInternalServerError,
-	// 	}, nil
-	// }
-	// jwtWrapperJson, err := json.Marshal(JwtWrapper{Token: tokenString})
-	jwtWrapperJson, _ := json.Marshal(JwtWrapper{Token: request.Body})
-	// if err != nil {
-	// 	return events.APIGatewayProxyResponse{
-	// 		Body: err.Error(), StatusCode: http.StatusInternalServerError,
-	// 	}, nil
-	// }
+	var client Client
+	err := json.Unmarshal([]byte(request.Body), &client)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			Body: err.Error(), StatusCode: http.StatusBadRequest,
+		}, nil
+	}
+	db, err := getConnection()
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			Body: err.Error(), StatusCode: http.StatusInternalServerError,
+		}, nil
+	}
+	err = db.Ping()
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			Body: err.Error(), StatusCode: http.StatusInternalServerError,
+		}, nil
+	}
+	defer db.Close()
+	storedClient, err := getClientDB(db, client)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			Body: err.Error(), StatusCode: http.StatusInternalServerError,
+		}, nil
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":    storedClient.ID,
+		"name":  storedClient.Name,
+		"cpf":   storedClient.Cpf,
+		"email": storedClient.Email,
+	})
+	tokenString, err := token.SignedString(getJWTSecret())
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			Body: err.Error(), StatusCode: http.StatusInternalServerError,
+		}, nil
+	}
+	jwtWrapperJson, err := json.Marshal(JwtWrapper{Token: tokenString})
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			Body: err.Error(), StatusCode: http.StatusInternalServerError,
+		}, nil
+	}
 	return events.APIGatewayProxyResponse{
 		Body:       string(jwtWrapperJson),
 		Headers:    map[string]string{"Content-Type": "application/json"},
@@ -105,18 +111,18 @@ func getConnection() (*sql.DB, error) {
 	return db, nil
 }
 
-func getClientDB(db *sql.DB) (*Client, error) {
+func getClientDB(db *sql.DB, client Client) (*Client, error) {
 	stmt, err := db.Prepare("select id, name, cpf, email from client where cpf = ?")
 	if err != nil {
 		return nil, err
 	}
 	defer stmt.Close()
-	var client Client
-	err = stmt.QueryRow("04787035116").Scan(&client.ID, &client.Name, &client.Cpf, &client.Email)
+	var storedClient Client
+	err = stmt.QueryRow(client.Cpf).Scan(&storedClient.ID, &storedClient.Name, &storedClient.Cpf, &storedClient.Email)
 	if err != nil {
 		return nil, err
 	}
-	return &client, nil
+	return &storedClient, nil
 }
 
 func getJWTSecret() []byte {
