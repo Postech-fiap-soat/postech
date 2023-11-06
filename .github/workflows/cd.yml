@@ -23,7 +23,7 @@ jobs:
         working-directory: './api'
 
   test:
-    name: Run Unit Tests
+    name: Run Application Tests
     runs-on: ubuntu-latest
     needs: build
     steps:
@@ -39,59 +39,54 @@ jobs:
     - run: npm test
       working-directory: './api'
   
-  # push_to_registry:
-  #   name: Push Docker image to Docker Hub
-  #   runs-on: ubuntu-latest
-  #   needs: test
-  #   steps:
-  #     - name: Check out the repo
-  #       uses: actions/checkout@v4
-  #     - name: Log in to Docker Hub
-  #       uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
-  #       with:
-  #         username: ${{ secrets.DOCKER_USERNAME }}
-  #         password: ${{ secrets.DOCKER_PASSWORD }}
-  #     - name: Extract metadata (tags, labels) for Docker
-  #       id: meta
-  #       uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
-  #       with:
-  #         images: ${{ vars.DOCKER_IMAGE }}
-  #         tags: latest
-  #     - name: Build and push Docker image
-  #       uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
-  #       with:
-  #         context: ./api
-  #         file: ./api/Dockerfile
-  #         push: true
-  #         tags: ${{ steps.meta.outputs.tags }}
-  #         labels: ${{ steps.meta.outputs.labels }}
-  
-  # infra_validation:
-  #   name: Terraform Validation and Build
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - uses: actions/checkout@v4
-  #   - name: Configure AWS Credentials Action For GitHub Actions
-  #     uses: aws-actions/configure-aws-credentials@v1
-  #     with:
-  #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-  #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #       aws-region: us-east-1
-  #   - name: Setup Terraform CLI
-  #     uses: hashicorp/setup-terraform@v2.0.2
-  #   - run: terraform -chdir='./k8s-infra' init
-  #   - run: terraform -chdir='./k8s-infra' plan
-  #   - run: terraform -chdir='./k8s-infra' apply --auto-approve        
-  
-  deploy_zip:
-    env:
-      DB_HOST: 'terraform-20231104215550504400000002.cv6estrfzfc7.us-east-1.rds.amazonaws.com'
-      DB_PORT: '3306'
-      DB_USER: 'soatuser'
-      DB_PASSWORD: 'soatpassword'
-      DB_NAME: 'soatdb'
-    name: deploy lambda function
+  push_to_registry:
+    name: Push Docker image to Registry
     runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ vars.DOCKER_IMAGE }}
+          tags: latest
+      - name: Build and push Docker image
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: ./api
+          file: ./api/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+  
+  infra_validation:
+    name: Terraform Validation and Build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Configure AWS Credentials Action For GitHub Actions
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+    - name: Setup Terraform CLI
+      uses: hashicorp/setup-terraform@v2.0.2
+    - run: terraform -chdir='./k8s-infra' init
+    - run: terraform -chdir='./k8s-infra' plan
+    - run: terraform -chdir='./k8s-infra' apply --auto-approve        
+  
+  deploy_lambda:  
+    name: Deploy AWS Lambda
+    runs-on: ubuntu-latest
+    needs: infra_validation
     strategy:
       matrix:
         go-version: [1.21.x]
@@ -103,13 +98,7 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
       - name: Build binary
-        run: |
-          echo $DB_HOST
-          # export DB_HOST=$DB_HOST
-          # export DB_PORT=$DB_PORT
-          # export DB_USER=$DB_USER
-          # export DB_PASSWORD=$DB_PASSWORD
-          # export DB_NAME=$DB_NAME
+        run: |      
           cd lambda && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -a -o bin/getclientbycpf getclientbycpf/main.go && zip deployment.zip bin/getclientbycpf
       - name: default deploy
         uses: appleboy/lambda-action@v0.1.9
@@ -120,24 +109,24 @@ jobs:
           function_name: getClientByCpf
           zip_file: lambda/deployment.zip
 
-  # deploy:
-  #   name: Terraform Validation and Build
-  #   runs-on: ubuntu-latest
-  #   needs: [push_to_registry, infra_validation]
-  #   steps:
-  #   - uses: actions/checkout@v4
-  #   - name: Configure AWS Credentials Action For GitHub Actions
-  #     uses: aws-actions/configure-aws-credentials@v1
-  #     with:
-  #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-  #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #       aws-region: us-east-1
-  #   - name: KUBECTL  
-  #     uses: azure/setup-kubectl@v3
-  #   - run: aws sts get-caller-identity
-  #   - run: aws eks update-kubeconfig --region us-east-1 --name no2-soat-ntsoatcluster
-  #   - run: kubectl get svc
-  #   - run: kubectl apply -f ./api/k8s/soatapp-configmap.yml
-  #   - run: kubectl apply -f ./api/k8s/secrets.yml
-  #   - run: kubectl apply -f ./api/k8s/soatapp.yml
-  #   - run: kubectl apply -f ./api/k8s/soatapp-svc.yml
+  deploy:
+    name: Deploy Application
+    runs-on: ubuntu-latest
+    needs: [push_to_registry, infra_validation, deploy_lambda]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Configure AWS Credentials Action For GitHub Actions
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+    - name: KUBECTL  
+      uses: azure/setup-kubectl@v3
+    - run: aws sts get-caller-identity
+    - run: aws eks update-kubeconfig --region us-east-1 --name no2-soat-ntsoatcluster
+    - run: kubectl get svc
+    - run: kubectl apply -f ./api/k8s/soatapp-configmap.yml
+    - run: kubectl apply -f ./api/k8s/secrets.yml
+    - run: kubectl apply -f ./api/k8s/soatapp.yml
+    - run: kubectl apply -f ./api/k8s/soatapp-svc.yml
