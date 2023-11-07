@@ -23,7 +23,7 @@ jobs:
         working-directory: './api'
 
   test:
-    name: Run Unit Tests
+    name: Run Application Tests
     runs-on: ubuntu-latest
     needs: build
     steps:
